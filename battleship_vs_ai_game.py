@@ -68,15 +68,31 @@ computer_board = BattleshipBoard()
 player_tracker = BattleshipBoard(True)
 computer_tracker = BattleshipBoard(True)
 
-
 def game_setup():
-    pass
+    print("Welcome to Battleship - the classic naval combat game.")
+    name = input("What's your name? ")
+
+    rules_reminder = """
+    PLACEHOLDER
+    FOR
+    RULES REMINDER
+    """
+    wants_rules_reminder = ""
+
+    while wants_rules_reminder != "y" and wants_rules_reminder != "n":
+        wants_rules_reminder = input(f"Would you like a quick refresher on the rules of Battleship, {name}? (y/n) ").lower()
+        if wants_rules_reminder == "y":
+            print(rules_reminder)
+    
+    ready_to_start = input("Type anything when you're ready to start the game. ")
 
 
-player_board.place_ship(5, 1, 6, 3)
+game_setup()
+
+# player_board.place_ship(5, 1, 6, 3)
 # player_board.fire_missile(7, 3)
 # player_board.fire_missile(2, 5)
 # print(player_board.board)
 # print(computer_tracker.board)
-player_board.print_board()
+# player_board.print_board()
 # computer_tracker.print_board()
