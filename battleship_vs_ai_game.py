@@ -3,6 +3,7 @@ from random import randint
 # Constants
 # Emoji's are for visual purposes (making a terminal game look better?)
 WATER = "🌊"
+TRACKER_WATER = "🟦"
 SHIP_PART = "🟧"
 HIT = "❌"
 MISS = "⚪"
@@ -12,7 +13,8 @@ ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUMBERS = [num for num in range(1, 27)]
 
 class BattleshipBoard():
-    def __init__(self, rows=SIZE, columns=SIZE):
+    def __init__(self, tracker=False, rows=SIZE, columns=SIZE):
+        self.tracker = tracker
         self.rows = rows
         self.columns = columns
         self.board = []
@@ -27,7 +29,10 @@ class BattleshipBoard():
                 elif row != 0 and column == 0:
                     self.board[row].append(f"{ALPHABET[row - 1]}")
                 else:
-                    self.board[row].append(WATER)
+                    if self.tracker == False:
+                        self.board[row].append(WATER)
+                    else:
+                        self.board[row].append(TRACKER_WATER)
     
     def print_board(self):
         # Method to print the board as SIZE strings
@@ -36,48 +41,42 @@ class BattleshipBoard():
 
     def place_ship(self, length, orientation, row, column):
         for i in range(length):
-            if orientation == 1:
+            if orientation == 0:
                 self.board[row][column + i] = SHIP_PART
             else:
                 self.board[row + i][column] = SHIP_PART
 
 
-
-class BattleshipTracker(BattleshipBoard):
-    def __init__(self, board, rows=SIZE, columns=SIZE):
-        self.board = board
-        super().__init__(self)
-
-
-    def receive_missile(self, row, column):
-        if self.board[row][column] == SHIP_PART:
-            self.board[row][column] = HIT
+def fire_missile(shooter_tracker, receiving_board, row, column):
+        if receiving_board[row][column] == SHIP_PART:
+            shooter_tracker[row][column] = HIT
         else:
-            self.board[row][column] = MISS
+            shooter_tracker[row][column] = MISS
 
-    def win_game(self):
+
+def has_won(board):
         for i in range(SIZE):
-            if SHIP_PART in self.board[i]:
+            if SHIP_PART in board[i]:
                 return False
         return True
 
-        
+       
 player_board = BattleshipBoard()
 computer_board = BattleshipBoard()
 
-# Players track the opponent's board based on hits and misses
-player_tracker = BattleshipTracker(computer_board)
-computer_tracker = BattleshipTracker(player_board)
-
+# Players track their opponent's board based on hits and misses
+player_tracker = BattleshipBoard(True)
+computer_tracker = BattleshipBoard(True)
 
 
 def game_setup():
     pass
 
-player_board.place_ship(5, 0, 6, 3)
-#player_board.fire_missile(7, 3)
-#player_board.fire_missile(2, 5)
+
+player_board.place_ship(5, 1, 6, 3)
+# player_board.fire_missile(7, 3)
+# player_board.fire_missile(2, 5)
+# print(player_board.board)
+# print(computer_tracker.board)
 player_board.print_board()
-#print(player_board.lose_game())
-print(computer_tracker.board)
-print(computer_tracker.win_game())
+# computer_tracker.print_board()
