@@ -45,7 +45,7 @@ class BattleshipBoard():
         for i in range(length):
             if orientation == 0:
                 self.board[row][column + i] = SHIP_PART
-            else:
+            elif orientation == 1:
                 self.board[row + i][column] = SHIP_PART
 
 
@@ -99,61 +99,61 @@ Our forces in the Pacific request back-up.
 We have a fleet ready at your disposal.
     """)
     for i in range(len(SHIPS_LENGTH)):
-        ship_orientation = ""
-        while ship_orientation not in ["v", "h"]:
-            ship_orientation = input(f"""Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {SHIPS_LENGTH[i]})
-(Type \"v\" for vertical or \"h\" for horizontal) """).lower()
-       
-        if ship_orientation == "v":
-            ship_orientation == 1
-        elif ship_orientation == "h":
-            ship_orientation == 0
+        ship_length = SHIPS_LENGTH[i]
+        # Prompt string for vertical or horizontal orientation
+        prompt_ship_orientation = f"""Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {ship_length})
+(Type \"v\" for vertical or \"h\" for horizontal) """
+        # Prompt string for row
+        prompt_ship_row = f"To which latitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type letter of row) "
+        # Prompt string for column
+        prompt_ship_column = f"To which longitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type number of column) "
 
+        # Prompt for orientation
+        ship_orientation = ""
+        while ship_orientation not in ["h", "v"]:
+            # Case-insensitive
+            ship_orientation = input(prompt_ship_orientation).lower()
         
-        ship_position = "A1"
+        # Set ship_orientation to corresponding int and prompt for coordinates, rejecting invalid inputs (ship must fit in grid)
         ship_row = 0
         ship_column = 0
+        if ship_orientation == "v":
+            ship_orientation = 1
+            while ship_row not in range(1, SIZE - ship_length + 2):
+                # Case-insensitive, converted to int via index in ALPHABET + 1
+                try:
+                    ship_row = ALPHABET.index(input(prompt_ship_row).upper()) + 1
+                # Prevent non-letter input
+                except ValueError:
+                    pass
+            while ship_column not in range(1, SIZE + 1):
+                try:
+                    # Converted to int
+                    ship_column = int(input(prompt_ship_column))
+                # Prevent non-int input
+                except ValueError:
+                    pass
 
-        while len(ship_position) not in [2, 3]:
-            if ship_orientation == 1:
-                
-                while ship_row not in range(1, (SIZE - SHIPS_LENGTH[i])) and ship_column not in range(1, SIZE):
-                    
-                    if i < (len(SHIPS_LENGTH) - 1):
-                        ship_position = input(f"To which coordinates shall we send our {ORDINALS[i]} ship? (Length = {SHIPS_LENGTH[i]}) (Type a letter (row) followed by a number (column)) ").upper()
-                    else:
-                        ship_position = input(f"To which coordinates shall we send our last ship? (Length = {SHIPS_LENGTH[i]}) (Type a letter (row) followed by a number (column)) ").upper()
-                    
-                    ship_row = ALPHABET.index(ship_position[0]) + 1
-                    ship_column = int(ship_position[1])
-
-            elif ship_orientation == 0:
-                
-                while ship_row not in range(1, SIZE) and ship_column not in range(1, (SIZE - SHIPS_LENGTH[i])):
-                    if i < (len(SHIPS_LENGTH) - 1):
-                        ship_position = input(f"To which coordinates shall we send our {ORDINALS[i]} ship? (Length = {SHIPS_LENGTH[i]}) (Type a letter (row) followed by a number (column)) ").upper()
-                    else:
-                        ship_position = input(f"To which coordinates shall we send our last ship? (Length = {SHIPS_LENGTH[i]}) (Type a letter (row) followed by a number (column)) ").upper()
-                    
-                    ship_row = ALPHABET.index(ship_position[0]) + 1
-                    ship_column = int(ship_position[1])                         
-
+        elif ship_orientation == "h":
+            ship_orientation = 0
+            while ship_row not in range(1, SIZE + 1):
+                try:
+                    ship_row = ALPHABET.index(input(prompt_ship_row).upper()) + 1
+                except ValueError:
+                    pass
+            while ship_column not in range(1, SIZE - ship_length + 2):
+                try:
+                    ship_column = int(input(prompt_ship_column))
+                except ValueError:
+                    pass
+        
         player_board.place_ship(SHIPS_LENGTH[i], ship_orientation, ship_row, ship_column)
         player_board.print_board()
 
 
 game_setup()
 
-""" TO DO: 
-    limit ship placement to inside grid
-    reprompt if
 """
-
-
-# player_board.place_ship(5, 1, 6, 3)
-# player_board.fire_missile(7, 3)
-# player_board.fire_missile(2, 5)
-# print(player_board.board)
-# print(computer_tracker.board)
-# player_board.print_board()
-# computer_tracker.print_board()
+TO-DO
+- prevent ships being placed on other ships
+"""
