@@ -72,17 +72,19 @@ class BattleshipBoard():
             row, column = coords[0], coords[1]
             self.board[row][column] = ship_part
 
-    def get_shot(self, tracker, missile_coords):
+    def get_shot(self, shooter, tracker, missile_coords):
         row, column = missile_coords[0], missile_coords[1]
         if self.board[row][column] in SHIP_PARTS:
-            print("HIT PLACEHOLDER")
+            if shooter == "player":
+                print("player has hit")
+            elif shooter == "computer":
+                print("computer has hit")
+
             self.board[row][column] = HIT
             tracker.board[row][column] = HIT
-            return True
         elif self.board[row][column] == WATER:
             print("MISS PLACEHOLDER")
-            tracker.board[row][column] = MISS
-            return False        
+            tracker.board[row][column] = MISS      
 
     def has_lost(self):
         for i in range(SIZE + 1):
@@ -155,7 +157,7 @@ def player_setup():
         player_board.place_ship(ship_part, ship_coords)
         player_board.print_board()
     
-    print(f"Captain {name}! \nIt seems the enemy forces have detected our presence. \nIt is imperative that we launch our attack first. \nWe trust in your leadership!")
+    print(f"Captain {name}! \nIt seems the enemy forces have detected our presence. \nIt is imperative that we launch our attack first. \nWe trust in your leadership!\n")
         
 
 def computer_setup():
@@ -169,15 +171,14 @@ def computer_setup():
         ship_column = SIZE + 2
 
         while computer_board.create_ship_coords(ship_length, ship_orientation, ship_row, ship_column) == False:
-            ship_row = random.randint(1, SIZE)
-            ship_column = random.randint(1, SIZE)
+            ship_row, ship_column = random.randint(1, SIZE), random.randint(1, SIZE)
 
         ship_part = SHIP_PARTS[i]
         ship_coords = computer_board.create_ship_coords(ship_length, ship_orientation, ship_row, ship_column)
         computer_board.place_ship(ship_part, ship_coords)
     
 
-#player_setup()
+player_setup()
 computer_setup()
 
 def create_missile_coords(target, tracker, row, column):
@@ -210,29 +211,33 @@ def player_turn():
                 continue
 
     missile_coords = create_missile_coords(computer_board, player_tracker, missile_row, missile_column)
-    computer_board.get_shot(player_tracker, missile_coords)
+    computer_board.get_shot("player", player_tracker, missile_coords)
     player_tracker.print_board()
     
 
-
-
 def computer_turn():
-    pass
+    missile_row = SIZE + 2
+    missile_column = SIZE + 2
+
+    while create_missile_coords(player_board, computer_tracker, missile_row, missile_column) == False:
+            missile_row, missile_column = random.randint(1, SIZE), random.randint(1, SIZE)
+
+    missile_coords = create_missile_coords(player_board, computer_tracker, missile_row, missile_column)
+    player_board.get_shot("computer", computer_tracker, missile_coords)
+    print("This is the current status of our fleet:")
+    player_board.print_board()
+
 
 # Game is played until one person has lost (by having no more ship parts)
-#while player_board.has_lost == False and computer_board.has_lost == False:
+while True:
     player_turn()
     computer_turn()
-
-if player_board.has_lost():
-    print("LOST PLACEHOLDER")
-
-if computer_board.has_lost():
-    print("WON PLACEHOLDER")
-
-computer_board.print_board()
-player_turn()
-computer_board.print_board()
+    if player_board.has_lost():
+        print("LOST PLACEHOLDER")
+        break
+    if computer_board.has_lost():
+        print("WON PLACEHOLDER")
+        break
 
 """
 TO-DO
