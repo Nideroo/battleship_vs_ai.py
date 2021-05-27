@@ -37,9 +37,11 @@ class BattleshipBoard():
                         self.board[row].append(TRACKER_WATER)
     
     def print_board(self):
+        print("")
         # Print the board as SIZE strings
         for row in self.board:
             print(*row, sep = " ")
+        print("")
 
     def create_ship_coords(self, length, orientation, row, column):
         ship_coords = []
@@ -70,14 +72,16 @@ class BattleshipBoard():
             row, column = coords[0], coords[1]
             self.board[row][column] = ship_part
 
-    def get_shot(self, missile_coords):
+    def get_shot(self, tracker, missile_coords):
         row, column = missile_coords[0], missile_coords[1]
         if self.board[row][column] in SHIP_PARTS:
+            print("HIT PLACEHOLDER")
             self.board[row][column] = HIT
+            tracker.board[row][column] = HIT
             return True
         elif self.board[row][column] == WATER:
             print("MISS PLACEHOLDER")
-            self.board[row][column] = MISS
+            tracker.board[row][column] = MISS
             return False        
 
     def has_lost(self):
@@ -124,9 +128,9 @@ def player_setup():
     for i in range(len(SHIPS_LENGTH)):
         ship_length = SHIPS_LENGTH[i]
         # Message to prompt for orientation (vertical or horizontal)
-        prompt_ship_orientation = f"""Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {ship_length}) \n(Type \"v\" for vertical or \"h\" for horizontal) """
+        prompt_ship_orientation = f"Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {ship_length}) \n(Type \"v\" for vertical or \"h\" for horizontal) "
         # Message to prompt for coords
-        prompt_ship_row_and_column = f"To which latitude and longitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type letter of row and number of column) "
+        prompt_ship_row_and_column = f"To which latitude and longitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type letter of row, number of column) "
 
         # Prompt for orientation
         ship_orientation = ""
@@ -150,6 +154,8 @@ def player_setup():
         ship_coords = player_board.create_ship_coords(ship_length, ship_orientation, ship_row, ship_column)
         player_board.place_ship(ship_part, ship_coords)
         player_board.print_board()
+    
+    print(f"Captain {name}! \nIt seems the enemy forces have detected our presence. \nIt is imperative that we launch our attack first. \nWe trust in your leadership!")
         
 
 def computer_setup():
@@ -174,14 +180,47 @@ def computer_setup():
 #player_setup()
 computer_setup()
 
+def create_missile_coords(target, tracker, row, column):
+    missile_coords = ()
+    try:
+        if target.board[row][column] == WATER or target.board[row][column] in SHIP_PARTS:
+            if tracker.board[row][column] == HIT or tracker.board[row][column] == MISS:
+                return False
+            missile_coords = (row, column)
+            return missile_coords
+        else:
+            return False
+    except IndexError:
+        return False
+
+
 def player_turn():
-    pass
+    print("This is roughly where the enemy fleet is located:")
+    player_tracker.print_board()
+    prompt_missile_row_and_column = "Where should we fire a missile at? (Type letter of row, number of column) "
+
+    missile_row = SIZE + 2
+    missile_column = SIZE + 2
+
+    while create_missile_coords(computer_board, player_tracker, missile_row, missile_column) == False:
+            try:
+                prompted_missile_coords = input(prompt_missile_row_and_column).upper()
+                missile_row, missile_column = ALPHABET.index(prompted_missile_coords[0]) + 1, int(prompted_missile_coords[1:])
+            except ValueError:
+                continue
+
+    missile_coords = create_missile_coords(computer_board, player_tracker, missile_row, missile_column)
+    computer_board.get_shot(player_tracker, missile_coords)
+    player_tracker.print_board()
+    
+
+
 
 def computer_turn():
     pass
 
 # Game is played until one person has lost (by having no more ship parts)
-while player_board.has_lost == False and computer_board.has_lost == False:
+#while player_board.has_lost == False and computer_board.has_lost == False:
     player_turn()
     computer_turn()
 
@@ -191,10 +230,11 @@ if player_board.has_lost():
 if computer_board.has_lost():
     print("WON PLACEHOLDER")
 
+computer_board.print_board()
+player_turn()
+computer_board.print_board()
 
 """
 TO-DO
 - replace PLACEHOLDERs
 """
-
-computer_board.print_board()
