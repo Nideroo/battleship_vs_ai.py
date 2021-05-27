@@ -119,12 +119,14 @@ def player_setup():
     player_board.print_board()
     print(f"Greetings, Captain {name}. \nOur forces in the Pacific request back-up. \nWe have a fleet ready at your disposal.")
 
+    # Ship placement
+    # Loop will repeat for every ship that needs to be placed
     for i in range(len(SHIPS_LENGTH)):
         ship_length = SHIPS_LENGTH[i]
         # Message to prompt for orientation (vertical or horizontal)
         prompt_ship_orientation = f"""Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {ship_length}) \n(Type \"v\" for vertical or \"h\" for horizontal) """
         # Message to prompt for row
-        prompt_ship_row = f"To which latitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type letter of row) "
+        prompt_ship_row_and_column = f"To which latitude and longitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type letter of row and number of column) "
         # Message to prompt for column
         prompt_ship_column = f"To which longitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type number of column) "
 
@@ -133,12 +135,29 @@ def player_setup():
         while ship_orientation not in ["h", "v"]:
             # Case-insensitive
             ship_orientation = input(prompt_ship_orientation).lower()
-
+        
+        # Will guarantee first condition check to evaluate to False
+        ship_row = SIZE + 2
+        ship_column = SIZE + 2
+        while player_board.create_ship_coords(ship_length, ship_orientation, ship_row, ship_column) == False:
+            try:
+                prompted_row_and_column = input(prompt_ship_row_and_column).upper()
+                #ship_row, ship_column = ALPHABET.index(input(prompt_ship_row_and_column).upper()[0]) + 1, int(input(prompt_ship_row_and_column)[1:])
+                ship_row, ship_column = ALPHABET.index(prompted_row_and_column[0]) + 1, int(prompted_row_and_column[1:])
+            except ValueError:
+                continue
+        
+        # Once we have a valid ship_row and ship_column we can actually create the coords and place the ship
+        ship_part = SHIP_PARTS[i]
+        ship_coords = player_board.create_ship_coords(ship_length, ship_orientation, ship_row, ship_column)
+        player_board.place_ship(ship_part, ship_coords)
+        player_board.print_board()
+        
 
 def computer_setup():
     pass
 
-#player_setup()
+player_setup()
 #computer_setup()
 
 def player_turn():
@@ -158,7 +177,6 @@ if player_board.has_lost():
 if computer_board.has_lost():
     print("WON PLACEHOLDER")
 
-print(player_board.create_ship_coords(5, "h", 10, 10))
 
 """
 TO-DO
