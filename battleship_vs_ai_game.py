@@ -37,21 +37,55 @@ class BattleshipBoard():
                         self.board[row].append(TRACKER_WATER)
     
     def print_board(self):
-        # Method to print the board as SIZE strings
+        # Print the board as SIZE strings
         for row in self.board:
             print(*row, sep = " ")
 
     def create_ship_coords(self, length, orientation, row, column):
-        pass
+        ship_coords = []
+        # If all coords contain WATER, it is a valid set of coords and the ship may be placed there with place_ship
+        if orientation == "h":
+            for i in range(length):
+                try:
+                    if self.board[row][column + i] == WATER:
+                        ship_coords.append((row, column + i))
+                    else:
+                        return False
+                except IndexError:
+                    return False
+        elif orientation == "v":
+            for i in range(length):
+                try:
+                    if self.board[row + i][column] == WATER:
+                        ship_coords.append((row + i, column))
+                    else:
+                        return False
+                except IndexError:
+                    return False
+        return ship_coords
     
-    def place_ship(self, colour, ship_coords):
-        pass
+    def place_ship(self, ship_part, ship_coords):
+        # Place the ship on the board
+        for coords in ship_coords:
+            row, column = coords[0], coords[1]
+            self.board[row][column] = ship_part
 
     def get_shot(self, missile_coords):
-        pass
+        row, column = missile_coords[0], missile_coords[1]
+        if self.board[row][column] in SHIP_PARTS:
+            self.board[row][column] = HIT
+            return True
+        elif self.board[row][column] == WATER:
+            print("MISS PLACEHOLDER")
+            self.board[row][column] = MISS
+            return False        
 
     def has_lost(self):
-        pass
+        for i in range(SIZE + 1):
+            for ship_part in SHIP_PARTS:
+                if ship_part in self.board[i]:
+                    return False
+        return True
 
 
 # This is the board where a player places their ships    
@@ -104,8 +138,8 @@ def player_setup():
 def computer_setup():
     pass
 
-player_setup()
-computer_setup()
+#player_setup()
+#computer_setup()
 
 def player_turn():
     pass
@@ -124,10 +158,11 @@ if player_board.has_lost():
 if computer_board.has_lost():
     print("WON PLACEHOLDER")
 
+print(player_board.create_ship_coords(5, "h", 10, 10))
+
 """
 TO-DO
 - type rules reminder
 - rework ships as lists of tuples
-- prevent ships being placed on other ships in both player_setup() and computer_setup()
 
 """
