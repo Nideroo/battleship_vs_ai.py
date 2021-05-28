@@ -27,6 +27,7 @@ Have fun!"
 Input is handled case-insensitively where appropriate. Although I encountered and fixed countless bugs during the creation of this project, it is always possible that you will find a brand new one yourself. It would be highly appreciated if you let me know, so I can fix it :)
 
 - Nicolas
+
 Github: Nideroo
 LinkedIn: Nicolas De Roover
 Medium: @nicolas.de.roover
