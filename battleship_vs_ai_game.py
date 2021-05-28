@@ -1,17 +1,45 @@
 import random
 
-# Constants
-# Emoji's are for visual purposes (making a terminal game look better?)
+"""
+Constants
+Emoji's are for visual purposes (making a terminal game look better?)
+I debated putting the messages somewhere else but didn't know a better place for them.
+"""
+SIZE = 10  # > 26 will cause problems with coordinates, spacing optimized for 10
+SHIPS_LENGTH = [5, 4, 3, 3, 2] # > 5 will require extension of SHIP_PARTS and ORDINALS
 WATER = "🌊"
 TRACKER_WATER = "🟦"
 SHIP_PARTS = "🟥🟧🟨🟩🟪"
 HIT = "❌"
+PLAYER_HIT_MESSAGES = ["We have reports of a hit on the enemy ship! Great work, captain.", "That one struck them where it hurt!", "Another one bites the dust.", "We have confirmation of a hit."]
+COMPUTER_HIT_MESSAGES = ["The enemy has struck one of our ships.", "I have received word that our fleet was hit.", "Ouch.", "Dire news, one of ours took a hit."]
 MISS = "⚪"
-SIZE = 10  # > 26 will cause problems with coordinates, spacing optimized for 10
-SHIPS_LENGTH = [5, 4, 3, 3, 2] # > 5 will require extension of SHIP_PARTS and ORDINALS
+PLAYER_MISS_MESSAGES = ["I'm afraid our last missile missed the mark.", "We have confirmation of a miss.", "I see the strategic value in missing that missile, we'll surely hit the next one!"]
+COMPUTER_MISS_MESSAGES = ["The enemy decided to try deep-sea fishing with their last missile.", "It appears the enemy is looking for Atlantis instead of our fleet", ""]
+WON_MESSAGE = "We have just received word that the enemy fleet is no more. \nYour strategical thinking and determination have led us all to victory. \nWe salute you, captain!"
+LOST_MESSAGE = "It appears the enemy has succeeded in sinking all of our ships. \nWe know you tried your best, captain. \nIt remains a dark day for us all."
 ORDINALS = ["first", "second", "third", "fourth", "fifth"]
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 NUMBERS = [num for num in range(1, 27)]
+RULES = f"""
+**************************************************************************************************************************************
+In Battleship, you are the captain of a fleet of {len(SHIPS_LENGTH)} ships that are exchanging fire with an equally sized enemy fleet.
+
+Your objective is sinking all of the enemy's ships before they sink yours. 
+Each turn, you will try to hit them with missiles by entering coordinates of squares on the board. The enemy will do the same. 
+Neither one knows the exact location of the other's fleet, only where they have hit or missed.
+
+At the start of a new game, you will place your ships of varying length on the board either horizontally or vertically.
+Ships must be fully placed on the board and may not overlap.
+
+Taking turns, both fleets fire missiles and receive confirmation of hits and misses.
+Furthermore, you will also be notified when a missile has just sunk the last part of an enemy ship.
+
+As soon as one captain has lost all their ships, the game ends.
+
+Have fun!
+**************************************************************************************************************************************
+"""
 
 class BattleshipBoard():
     def __init__(self, tracker=False, rows=SIZE, columns=SIZE):
@@ -76,14 +104,28 @@ class BattleshipBoard():
         row, column = missile_coords[0], missile_coords[1]
         if self.board[row][column] in SHIP_PARTS:
             if shooter == "player":
-                print("player has hit")
+                print(PLAYER_HIT_MESSAGES[random.randint(0, len(PLAYER_HIT_MESSAGES) - 1)])
             elif shooter == "computer":
-                print("computer has hit")
-
+                print(COMPUTER_HIT_MESSAGES[random.randint(0, len(COMPUTER_HIT_MESSAGES) - 1)])
+            this_ship_part = self.board[row][column]
             self.board[row][column] = HIT
             tracker.board[row][column] = HIT
+            ship_sunk = True
+            if this_ship_part in self.board[row]:
+                ship_sunk = False
+            for i in range(SIZE + 1):
+                if this_ship_part in self.board[i][column]:
+                    ship_sunk = False
+            if ship_sunk:
+                if shooter == "player":
+                    print("We have sunk one of their ships!")
+                elif shooter == "computer":
+                    print("One of our ships was damaged beyond repair and has sunk.")
         elif self.board[row][column] == WATER:
-            print("MISS PLACEHOLDER")
+            if shooter == "player":
+                print(PLAYER_MISS_MESSAGES[random.randint(0, len(PLAYER_MISS_MESSAGES) - 1)])
+            elif shooter == "computer":
+                print(COMPUTER_MISS_MESSAGES[random.randint(0, len(COMPUTER_MISS_MESSAGES) - 1)])
             tracker.board[row][column] = MISS      
 
     def has_lost(self):
@@ -107,17 +149,12 @@ def player_setup():
     print("Welcome to Battleship - the classic naval combat game.")
     name = input("What's your name? ")
 
-    rules_reminder = """
-    PLACEHOLDER
-    FOR
-    RULES REMINDER
-    """
-    wants_rules_reminder = ""
+    wants_rules = ""
     # Re-prompts after other input, but will accept case-insensitive y/n
-    while wants_rules_reminder != "y" and wants_rules_reminder != "n":
-        wants_rules_reminder = input(f"Would you like a quick refresher on the rules of Battleship, Captain {name}? (y/n) ").lower()
-        if wants_rules_reminder == "y":
-            print(rules_reminder)
+    while wants_rules != "y" and wants_rules != "n":
+        wants_rules = input(f"Would you like a quick refresher on the rules of Battleship, Captain {name}? (y/n) ").lower()
+        if wants_rules == "y":
+            print(RULES)
     
     # Gives user chance to read rules if they requested them, before we print the board
     ready_to_start = input("Type anything when you're ready to start the game. ")
@@ -130,7 +167,7 @@ def player_setup():
     for i in range(len(SHIPS_LENGTH)):
         ship_length = SHIPS_LENGTH[i]
         # Message to prompt for orientation (vertical or horizontal)
-        prompt_ship_orientation = f"Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {ship_length}) \n(Type \"v\" for vertical or \"h\" for horizontal) "
+        prompt_ship_orientation = f"Shall we align the next ship along the North-South axis (vertically) or the East-West axis (horizontally)? (Length = {ship_length}) \n(Type \"h\" for horizontal or \"v\" for vertical) "
         # Message to prompt for coords
         prompt_ship_row_and_column = f"To which latitude and longitude shall we send our {ORDINALS[i]} ship? (Length = {ship_length}) (Type letter of row, number of column) "
 
@@ -231,15 +268,12 @@ def computer_turn():
 # Game is played until one person has lost (by having no more ship parts)
 while True:
     player_turn()
-    computer_turn()
-    if player_board.has_lost():
-        print("LOST PLACEHOLDER")
-        break
+    print("*" * 50)
     if computer_board.has_lost():
-        print("WON PLACEHOLDER")
+        print(WON_MESSAGE)
         break
-
-"""
-TO-DO
-- replace PLACEHOLDERs
-"""
+    computer_turn()
+    print("*" * 50)
+    if player_board.has_lost():
+        print(LOST_MESSAGE)
+        break
