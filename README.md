@@ -29,5 +29,7 @@ Input is handled case-insensitively where appropriate. Although I encountered an
 - Nicolas
 
 *Github: Nideroo
+
 *LinkedIn: Nicolas De Roover
+
 *Medium: @nicolas.de.roover
